@@ -57,6 +57,8 @@ namespace WebAPI.Controllers
             return new JsonResult(table);
         }
 
+        
+
         [Route("LoginData")]
         [HttpPost]
         public JsonResult LoginData(Login data)
@@ -78,6 +80,79 @@ namespace WebAPI.Controllers
                         myCommand.Parameters.AddWithValue("@Email", data.Username);
                         myCommand.Parameters.AddWithValue("@Mobile", data.Username);
                         myCommand.Parameters.AddWithValue("@Password", data.Password);
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader); ;
+
+                        myReader.Close();
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                //return new JsonResult("falsedfghjk");
+
+            }
+            return new JsonResult(table.Rows.Count);
+
+        }
+
+
+        [Route("RstPwd")]
+        [HttpPost]
+
+        public JsonResult RstPwd(Password dt)
+        {
+            string query = @"update dbo.Users set Password='"+dt.password+"' where Email='" + dt.email + "'";
+            DataTable table = new DataTable();
+
+            string sqlDataSource = _configuration.GetConnectionString("UserAppCon");
+            SqlDataReader myReader;
+            //bool flag = false;
+            try
+            {
+                using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+                {
+                    myCon.Open();
+                    using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                    {
+                       
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader); ;
+
+                        myReader.Close();
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine();
+            }
+            return new JsonResult("Success");
+        }
+
+
+        [Route("EmailVerify")]
+        [HttpPost]
+        public JsonResult EmailVerify(EmailVar data)
+        {
+            string query = @"select * from dbo.Users where Email='" + data.email + "'";
+            DataTable table = new DataTable();
+
+            string sqlDataSource = _configuration.GetConnectionString("UserAppCon");
+            SqlDataReader myReader;
+            //bool flag = false;
+            try
+            {
+                using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+                {
+                    myCon.Open();
+                    using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                    {
+                       
                         myReader = myCommand.ExecuteReader();
                         table.Load(myReader); ;
 
@@ -140,6 +215,37 @@ namespace WebAPI.Controllers
             
 
             return new JsonResult(table.Rows.Count);
+        }
+
+        [Route("UserData")]
+        [HttpPost]
+        public JsonResult UserData(Login em)
+        {
+            string query = @"select FirstName,LastName,DOB,Email,Mobile,Gender,ProfilePicture from dbo.Users where Email='" + em.Username + "'";
+            DataTable table = new DataTable();
+            string sqlDataSource = _configuration.GetConnectionString("UserAppCon");
+            SqlDataReader myReader;
+            try
+            {
+                using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+                {
+                    myCon.Open();
+                    using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                    {
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader); ;
+
+                        myReader.Close();
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+
+            return new JsonResult(table);
         }
 
 
